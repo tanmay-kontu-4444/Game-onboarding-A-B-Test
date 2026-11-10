@@ -11,6 +11,10 @@ def test_readout_is_up_to_date():
     assert report.OUTPUT.read_text() == report.render(), "run `make report`"
 
 
+def test_readme_headline_is_up_to_date():
+    assert report.README.read_text() == report.render_readme(), "run `make report`"
+
+
 def test_no_unresolved_placeholders():
     assert not re.search(r"\{[a-z_0-9]+\}", report.OUTPUT.read_text())
 

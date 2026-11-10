@@ -22,7 +22,8 @@ SELECT DISTINCT
 FROM sessions_dedup AS s
 JOIN player_cohort AS c USING (player_id)
 WHERE date_diff('day', c.install_date, CAST(s.session_start_ts AS DATE))
-      BETWEEN 0 AND getvariable('curve_max_day');
+      BETWEEN 0 AND getvariable('curve_max_day')
+ORDER BY s.player_id, day_n;
 
 CREATE OR REPLACE TABLE metrics_per_player AS
 WITH
@@ -121,4 +122,5 @@ LEFT JOIN session_metrics     AS s  USING (player_id)
 LEFT JOIN progression_metrics AS pr USING (player_id)
 LEFT JOIN purchase_metrics    AS pu USING (player_id)
 LEFT JOIN crash_metrics       AS cr USING (player_id)
-LEFT JOIN later_revenue       AS lr USING (player_id);
+LEFT JOIN later_revenue       AS lr USING (player_id)
+ORDER BY c.player_id;   -- stable row order => reproducible bootstrap draws

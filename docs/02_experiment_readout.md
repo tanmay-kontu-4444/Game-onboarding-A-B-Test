@@ -88,7 +88,7 @@ The lift appears from D1 onwards and persists. The 95% CI of the daily differenc
 ### 4.2 Secondary metrics: all improved (Holm-adjusted)
 
 * **Tutorial completion:** 59.74% → 77.37% (**+17.63pp**, adj. p < 0.0001). The mechanism works: a shorter flow is completed far more often.
-* **Levels completed by D3:** 6.69 → 7.11 (+6.4%, adj. p < 0.0001; bootstrap CI +0.33 to +0.53; Mann–Whitney p < 0.0001). Players reach real gameplay sooner.
+* **Levels completed by D3:** 6.69 → 7.11 (+6.4%, adj. p < 0.0001; bootstrap CI +0.34 to +0.52; Mann–Whitney p < 0.0001). Players reach real gameplay sooner.
 * **D1 retention:** 37.60% → 39.09% (+1.49pp, adj. p < 0.0001).
 
 ### 4.3 Guardrails against pre-registered thresholds
@@ -96,7 +96,7 @@ The lift appears from D1 onwards and persists. The 95% CI of the daily differenc
 | Guardrail                              | Rel diff   | 95% CI (rel)     | Bootstrap CI (rel)   | Unacceptable if worse than   | Worse CI bound   | Mann-Whitney p   | Verdict          |
 |:---------------------------------------|:-----------|:-----------------|:---------------------|:-----------------------------|:-----------------|:-----------------|:-----------------|
 | Purchase conversion (first 7 days)     | +4.0%      | [-5.2%, +13.3%]  | [-5.1%, +13.8%]      | -10%                         | -5.2%            | -                | **PASS**         |
-| Revenue per player (first 7 days, USD) | +6.8%      | [-12.4%, +26.0%] | [-10.6%, +26.4%]     | -10%                         | -12.4%           | 0.3802           | **INCONCLUSIVE** |
+| Revenue per player (first 7 days, USD) | +6.8%      | [-12.4%, +26.0%] | [-9.9%, +27.4%]      | -10%                         | -12.4%           | 0.3802           | **INCONCLUSIVE** |
 | Crash rate (first 7 days)              | +0.4%      | [-4.4%, +5.1%]   | [-4.4%, +5.0%]       | +10%                         | +5.1%            | -                | **PASS**         |
 | Avg session length (sec, first 7 days) | -3.3%      | [-4.4%, -2.1%]   | [-4.4%, -2.1%]       | -5%                          | -4.4%            | < 0.0001         | **PASS**         |
 

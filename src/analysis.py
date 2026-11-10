@@ -46,6 +46,10 @@ def load() -> dict[str, pd.DataFrame]:
         if not path.exists():
             raise FileNotFoundError(f"{path} missing - run `make cohorts` first")
         out[n] = pd.read_parquet(path)
+    # Deterministic row order: bootstrap resampling indexes rows, so order must not depend on DuckDB threads.
+    for n, keys in {"metrics_per_player": ["player_id"], "player_active_days": ["player_id", "day_n"],
+                    "cohort_audit": ["player_id"]}.items():
+        out[n] = out[n].sort_values(keys, kind="stable").reset_index(drop=True)
     out["metrics_per_player"]["treat"] = out["metrics_per_player"]["variant"].eq("treatment")
     return out
 

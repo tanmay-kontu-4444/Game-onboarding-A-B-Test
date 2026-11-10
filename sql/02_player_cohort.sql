@@ -129,4 +129,5 @@ SELECT
     country_tier,
     acquisition_channel
 FROM cohort_audit
-WHERE exclusion_reason IS NULL;
+WHERE exclusion_reason IS NULL
+ORDER BY player_id;   -- stable row order => byte-identical reruns
