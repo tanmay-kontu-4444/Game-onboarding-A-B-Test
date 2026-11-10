@@ -271,6 +271,7 @@ def retention_curves(m: pd.DataFrame, active: pd.DataFrame) -> pd.DataFrame:
 def novelty_check(m: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, float]]:
     """D7 effect by enrolment week, plus heterogeneity and linear-trend tests."""
     wk = d7_effect_by(m, "enrolment_week").rename(columns={"segment": "enrolment_week"})
+    wk["enrolment_week"] = wk["enrolment_week"].astype(int)
     q = su.cochran_q(wk["abs_diff"], wk["se"])
     w = 1 / wk["se"] ** 2
     x = wk["enrolment_week"].astype(float)
@@ -316,11 +317,15 @@ def practical_significance(m: pd.DataFrame, sc: pd.DataFrame) -> dict[str, float
         "gain_high": gain(d7["abs_ci_high"]),
         "early_rev_diff_per_player": rev["abs_diff"],
         "early_rev_change_per_100k": rev["abs_diff"] * INSTALL_BASIS,
+        "early_rev_change_ci_low": rev["abs_ci_low"] * INSTALL_BASIS,
+        "early_rev_change_ci_high": rev["abs_ci_high"] * INSTALL_BASIS,
         "cost_central": cost(rev["abs_diff"]),
         "cost_worst": cost(rev["abs_ci_low"]),
         "cost_best": cost(rev["abs_ci_high"]),
     }
-    out["net_central"] = out["gain_central"] - out["cost_central"]
+    # Conservative: a non-significant revenue *gain* is not banked; only losses count.
+    out["cost_central_banked"] = max(out["cost_central"], 0.0)
+    out["net_central"] = out["gain_central"] - out["cost_central_banked"]
     out["net_pessimistic"] = out["gain_low"] - out["cost_worst"]
     out["breakeven_rev_drop_rel"] = -out["gain_central"] / (LTV_MULT_EARLY_REVENUE * INSTALL_BASIS * rev["control"])
     return out

@@ -512,7 +512,7 @@
     "by_week": [
       {
         "dimension": "enrolment_week",
-        "enrolment_week": "1",
+        "enrolment_week": 1,
         "n_control": 9749,
         "n_treatment": 9643,
         "control": 0.17786439634834342,
@@ -526,7 +526,7 @@
       },
       {
         "dimension": "enrolment_week",
-        "enrolment_week": "2",
+        "enrolment_week": 2,
         "n_control": 10190,
         "n_treatment": 10173,
         "control": 0.17419038272816487,
@@ -540,7 +540,7 @@
       },
       {
         "dimension": "enrolment_week",
-        "enrolment_week": "3",
+        "enrolment_week": 3,
         "n_control": 9850,
         "n_treatment": 9595,
         "control": 0.17522842639593908,
@@ -554,7 +554,7 @@
       },
       {
         "dimension": "enrolment_week",
-        "enrolment_week": "4",
+        "enrolment_week": 4,
         "n_control": 9815,
         "n_treatment": 9886,
         "control": 0.18543046357615894,
@@ -983,10 +983,13 @@
     "gain_high": 4099.3271799330705,
     "early_rev_diff_per_player": 0.012783030434772441,
     "early_rev_change_per_100k": 1278.303043477244,
+    "early_rev_change_ci_low": -2218.582485412245,
+    "early_rev_change_ci_high": 4775.188572366734,
     "cost_central": -2556.606086954488,
     "cost_worst": 4437.16497082449,
     "cost_best": -9550.377144733468,
-    "net_central": 5352.43592683484,
+    "cost_central_banked": 0.0,
+    "net_central": 2795.8298398803513,
     "net_pessimistic": -2944.8324709968592,
     "breakeven_rev_drop_rel": -0.07450078384286617
   },
