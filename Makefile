@@ -1,9 +1,9 @@
 # Simulated A/B test of a mobile-game onboarding change (SYNTHETIC DATA).
 PYTHON ?= python
 
-.PHONY: all data power cohorts analysis report test clean
+.PHONY: all data power cohorts analysis report test recovery clean
 
-all: data cohorts analysis report test
+all: data cohorts analysis report test recovery
 
 data:            ## Generate synthetic raw event data (+ ground truth for validation)
 	$(PYTHON) -m src.simulate
@@ -23,5 +23,8 @@ report:          ## Render docs/02_experiment_readout.md from output tables
 test:            ## Unit + integration + effect-recovery tests
 	$(PYTHON) -m pytest -q
 
+recovery:        ## Validation only: compare estimates with simulated ground truth
+	$(PYTHON) -m src.recovery_check
+
 clean:
-	rm -rf data/raw/*.parquet data/raw/*.json data/processed/*.parquet
+	rm -rf data/raw/*.parquet data/raw/*.json data/processed/*.parquet outputs/validation
