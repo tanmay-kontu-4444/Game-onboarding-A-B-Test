@@ -1,0 +1,16 @@
+{
+  "alpha": 0.05,
+  "power": 0.8,
+  "baseline_d7": 0.18,
+  "design_mde_abs": 0.01,
+  "design_mde_rel": 0.05555555555555556,
+  "n_per_arm_for_design_mde": 23665,
+  "n_total_for_design_mde": 47330,
+  "days_for_design_mde": 18,
+  "planned_daily_installs": 2850,
+  "eligibility_rate": 0.97,
+  "planned_enrolment_days": 28,
+  "planned_n_per_arm": 38703,
+  "mde_abs_at_planned_n": 0.007801665096005362,
+  "power_at_design_mde_planned_n": 0.9476928889401507
+}
