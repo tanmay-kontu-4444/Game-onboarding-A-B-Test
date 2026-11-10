@@ -1,0 +1,6 @@
+| table_name         |   raw_rows |   dedup_rows |   duplicates_removed |
+|:-------------------|-----------:|-------------:|---------------------:|
+| sessions           |    1131651 |      1120447 |                11204 |
+| progression_events |    2187002 |      2154682 |                32320 |
+| purchases          |       4905 |         4881 |                   24 |
+| crashes            |      13466 |        13399 |                   67 |

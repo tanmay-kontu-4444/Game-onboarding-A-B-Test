@@ -1,0 +1,10 @@
+| check_name                               | control   | treatment   |   total |
+|:-----------------------------------------|:----------|:------------|--------:|
+| assignment log rows                      | 42496     | 42249       |   84745 |
+| distinct assigned players                | 42318     | 42065       |   84383 |
+| players with duplicate same-arm rows     | 168       | 169         |     337 |
+| players assigned to both arms            | 15        | 10          |      25 |
+| assigned before install                  | 14        | 16          |      30 |
+| install outside enrolment window         | 2664      | 2729        |    5393 |
+| assigned but no install record           | 0         | 0           |       0 |
+| enrolment-window installs never assigned | <NA>      | <NA>        |    1181 |

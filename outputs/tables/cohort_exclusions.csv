@@ -1,0 +1,6 @@
+step,control,treatment,total
+assigned_before_install,11,16,27
+assigned_both_arms,14,10,24
+bot_like_activity,25,13,38
+outside_enrolment_window,2664,2729,5393
+eligible (analysis cohort),39604,39297,78901
