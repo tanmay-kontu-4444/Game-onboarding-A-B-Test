@@ -8,6 +8,8 @@
 --   levels_by_d3       level_complete events on days 0..levels_last_day
 --   purchased_d7 / revenue_d7 / crashed_d7 / avg_session_len  on days 0..early_window-1
 --   day0_sessions      sessions on install day (CUPED covariate)
+--   revenue_d7_d34     revenue on days 7..34 (NULL unless day 34 is complete);
+--                      used only to value a retained player (practical significance)
 --
 -- Outputs: player_active_days (player_id, day_n) for retention curves,
 --          metrics_per_player
@@ -78,6 +80,14 @@ purchase_metrics AS (
     GROUP BY p.player_id
 ),
 
+later_revenue AS (
+    SELECT p.player_id, sum(revenue_usd) AS revenue_d7_d34
+    FROM purchases_dedup AS p
+    JOIN cohort AS c USING (player_id)
+    WHERE date_diff('day', c.install_date, CAST(p.purchase_ts AS DATE)) BETWEEN 7 AND 34
+    GROUP BY p.player_id
+),
+
 crash_metrics AS (
     SELECT DISTINCT x.player_id
     FROM crashes_dedup AS x
@@ -104,9 +114,11 @@ SELECT
     (cr.player_id IS NOT NULL)::INT                                                AS crashed_d7,
     s.avg_session_len,                                  -- NULL if no sessions in days 0..6
     coalesce(s.sessions_d7, 0)                                                     AS sessions_d7,
-    coalesce(s.day0_sessions, 0)                                                   AS day0_sessions
+    coalesce(s.day0_sessions, 0)                                                   AS day0_sessions,
+    CASE WHEN c.last_complete_day >= 34 THEN coalesce(lr.revenue_d7_d34, 0.0) END  AS revenue_d7_d34
 FROM cohort AS c
 LEFT JOIN session_metrics     AS s  USING (player_id)
 LEFT JOIN progression_metrics AS pr USING (player_id)
 LEFT JOIN purchase_metrics    AS pu USING (player_id)
-LEFT JOIN crash_metrics       AS cr USING (player_id);
+LEFT JOIN crash_metrics       AS cr USING (player_id)
+LEFT JOIN later_revenue       AS lr USING (player_id);
