@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Onboarding Test Results</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Interactive results of a simulated A/B test of a mobile puzzle game's onboarding (synthetic data).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column of report sections; each pairs a short finding with one interactive chart. */
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --fg: #14161b;
+  --muted: #586070;
+  --line: #dfe3ea;
+  --grid: #eceff3;
+  --control: #2a78d6;
+  --treat: #eb6834;
+  --good: #0b7d0b;  --good-bg: #e3f4e3;
+  --warn: #8a5a00;  --warn-bg: #fdf0d2;
+  --bad: #c03030;   --bad-bg: #fbe4e4;
+  --neutral-bg: #eceff3;
+  --thresh: #d03b3b;
+  --font-display: "Bricolage Grotesque", "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111317; --surface: #191c22; --fg: #eceef2; --muted: #a2a9b6; --line: #2b3039; --grid: #23272f;
+    --control: #3987e5; --treat: #e8713f;
+    --good: #5fcf5f; --good-bg: #16301a; --warn: #f2c14e; --warn-bg: #3a2e12; --bad: #f07a7a; --bad-bg: #3a1a1a;
+    --neutral-bg: #262a32; --thresh: #f07a7a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111317; --surface: #191c22; --fg: #eceef2; --muted: #a2a9b6; --line: #2b3039; --grid: #23272f;
+  --control: #3987e5; --treat: #e8713f;
+  --good: #5fcf5f; --good-bg: #16301a; --warn: #f2c14e; --warn-bg: #3a2e12; --bad: #f07a7a; --bad-bg: #3a1a1a;
+  --neutral-bg: #262a32; --thresh: #f07a7a;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 48px;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; gap: 56px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: clamp(30px, 5.2vw, 52px); font-weight: 800; line-height: 1.05; }
+h2 { font-size: clamp(22px, 3vw, 30px); font-weight: 800; line-height: 1.15; }
+h3 { font-size: 17px; font-weight: 600; }
+p { margin: 0; max-width: 68ch; }
+.muted { color: var(--muted); }
+.mono, .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+a { color: inherit; text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--control); outline-offset: 2px; border-radius: 4px; }
+
+/* sticky nav */
+.nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line);
+  display: flex; gap: 4px 18px; flex-wrap: wrap; align-items: center; padding-block: 12px; margin-bottom: -24px; }
+.nav .id { font-family: var(--font-mono); font-size: 12px; color: var(--muted); margin-right: auto; }
+.nav a { font-size: 13px; font-weight: 500; text-decoration: none; color: var(--muted); }
+.nav a:hover { color: var(--fg); }
+
+/* hero */
+.hero { display: grid; gap: 22px; padding-top: 24px; }
+.banner { font-size: 13px; border: 1px dashed var(--line); border-radius: var(--radius); padding: 8px 12px; color: var(--muted); max-width: max-content; }
+.banner b { color: var(--fg); }
+.decision { display: inline-flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.kpi .big { font-family: var(--font-display); font-weight: 800; font-size: 32px; line-height: 1.1; }
+.kpi .sub { font-size: 13px; color: var(--muted); }
+
+/* onboarding flows */
+.flows { display: grid; gap: 14px; }
+.flow { display: grid; grid-template-columns: 110px 1fr; gap: 12px; align-items: center; }
+.flow .who { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex: none; }
+.steps { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.step { font-size: 12px; border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 4px 8px; white-space: nowrap; }
+.step.shop { border-color: var(--treat); }
+.step.opt { border-style: dashed; color: var(--muted); }
+@media (max-width: 520px) { .flow { grid-template-columns: 1fr; gap: 6px; } }
+
+/* sections */
+section { display: flex; flex-direction: column; gap: 16px; scroll-margin-top: 64px; }
+.head { display: flex; flex-direction: column; gap: 6px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; min-width: 0; }
+.chart { width: 100%; position: relative; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); align-items: center; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.tick-key { width: 3px; height: 12px; background: var(--thresh); display: inline-block; }
+.two { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; }
+.two > * { min-width: 0; }
+@media (max-width: 820px) { .two { grid-template-columns: 1fr; } }
+
+/* controls */
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; flex-wrap: wrap; }
+.seg button { font: inherit; font-size: 13px; padding: 6px 12px; border: 0; background: var(--surface); color: var(--muted); cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+.row { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; }
+label.slider { display: grid; gap: 4px; font-size: 13px; }
+label.slider .top { display: flex; justify-content: space-between; gap: 8px; }
+input[type=range] { width: 100%; accent-color: var(--fg); }
+
+/* pills */
+.pill { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+.pill::before { font-size: 11px; }
+.pill.good { background: var(--good-bg); color: var(--good); } .pill.good::before { content: "✓"; }
+.pill.warn { background: var(--warn-bg); color: var(--warn); } .pill.warn::before { content: "!"; }
+.pill.bad { background: var(--bad-bg); color: var(--bad); } .pill.bad::before { content: "✕"; }
+.pill.neutral { background: var(--neutral-bg); color: var(--muted); } .pill.neutral::before { content: "–"; }
+.pill.big { font-size: 14px; padding: 6px 12px; white-space: normal; border-radius: 12px; }
+
+/* detail list */
+dl.kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0; font-size: 13px; }
+dl.kv dt { color: var(--muted); }
+dl.kv dd { margin: 0; font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; }
+.detail { display: flex; flex-direction: column; gap: 12px; }
+.detail .note { font-size: 13px; color: var(--muted); }
+
+/* tables */
+.tablewrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { text-align: right; padding: 7px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; font-variant-numeric: tabular-nums; }
+th:first-child, td:first-child { text-align: left; }
+th { font-weight: 600; color: var(--muted); font-size: 12px; }
+
+/* value calculator */
+.calc { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.calc > * { min-width: 0; }
+@media (max-width: 760px) { .calc { grid-template-columns: 1fr; } }
+.controls { display: flex; flex-direction: column; gap: 16px; }
+.bars { display: flex; flex-direction: column; gap: 10px; }
+.bar { display: grid; grid-template-columns: 140px 1fr 86px; gap: 10px; align-items: center; font-size: 13px; }
+.bar .track { height: 14px; position: relative; background: var(--grid); border-radius: 4px; }
+.bar .fill { position: absolute; top: 0; bottom: 0; border-radius: 4px; }
+.bar .zero { position: absolute; top: -3px; bottom: -3px; width: 1px; background: var(--muted); left: 50%; }
+.bar .v { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.net { font-family: var(--font-display); font-weight: 800; font-size: 34px; }
+@media (max-width: 460px) { .bar { grid-template-columns: 96px 1fr 72px; } }
+
+/* tooltip */
+#tip { position: fixed; z-index: 20; pointer-events: none; background: var(--fg); color: var(--bg); font-size: 12px; line-height: 1.45;
+  padding: 8px 10px; border-radius: 8px; max-width: 260px; opacity: 0; transition: opacity .08s; }
+#tip.on { opacity: 1; }
+#tip b { font-weight: 600; }
+@media (prefers-reduced-motion: reduce) { #tip { transition: none; } }
+
+ul.plain { margin: 0; padding-left: 18px; display: grid; gap: 6px; max-width: 72ch; }
+footer { border-top: 1px solid var(--line); padding-top: 16px; font-size: 13px; color: var(--muted); display: grid; gap: 6px; }
+code { font-family: var(--font-mono); font-size: 12.5px; background: var(--neutral-bg); padding: 1px 5px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav" aria-label="Sections">
+    <span class="id" id="exp-id"></span>
+    <a href="#results">Results</a><a href="#retention">Retention</a><a href="#segments">Segments</a><a href="#value">Value</a><a href="#design">Design</a>
+  </nav>
+
+  <header class="hero">
+    <div class="banner"><b>Simulated data.</b> A synthetic A/B test built as a portfolio project. The game and players are fictional; the workflow is real.</div>
+    <div class="eyebrow" id="hero-eyebrow"></div>
+    <h1>Shorter onboarding keeps more players. The revenue question is still open.</h1>
+    <div class="decision"><span class="pill big warn" id="decision-pill"></span><span class="muted" id="decision-rule"></span></div>
+    <p id="hero-lede"></p>
+    <div class="kpis" id="kpis"></div>
+    <div class="panel flows" aria-label="What changed">
+      <div class="flow"><div class="who"><span class="dot" style="background:var(--control)"></span>Control</div>
+        <div class="steps"><span class="step">1 · Swipe to match</span><span class="step">2 · Combos</span><span class="step">3 · Boosters</span><span class="step">4 · Lives</span><span class="step">5 · Daily goals</span><span class="step shop">6 · Shop tour</span><span class="step">7 · Rewards</span></div></div>
+      <div class="flow"><div class="who"><span class="dot" style="background:var(--treat)"></span>Treatment</div>
+        <div class="steps"><span class="step">Level 1 · swipe</span><span class="step">Level 2 · combos</span><span class="step">Level 3 · boosters</span><span class="step opt">optional tips</span></div></div>
+      <p class="muted" style="font-size:13px">Step names are illustrative. The treatment teaches the basics inside the first three levels and drops the forced shop tour, which is why early monetisation is the main risk.</p>
+    </div>
+  </header>
+
+  <section id="results">
+    <div class="head"><div class="eyebrow">Scorecard</div><h2>Every metric, against its pre-registered bar</h2>
+      <p class="muted">Relative change, treatment vs control, with 95% confidence intervals. Guardrails pass only if the whole interval clears their red limit. Select a metric for details.</p></div>
+    <div class="two">
+      <div class="panel"><div class="legend" style="margin-bottom:6px"><span><span class="dot" style="background:var(--treat)"></span>Primary &amp; secondary</span><span><span class="dot" style="background:var(--control)"></span>Guardrail</span><span><span class="tick-key"></span>Unacceptable limit</span></div>
+        <div class="chart" id="score-chart"></div></div>
+      <div class="panel detail" id="metric-detail" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section id="retention">
+    <div class="head"><div class="eyebrow">Retention curves · D1–D14</div><h2 id="ret-title"></h2>
+      <p class="muted" id="ret-sub"></p></div>
+    <div class="panel">
+      <div class="row" style="margin-bottom:8px">
+        <div class="legend" id="ret-legend"></div>
+        <div class="seg" role="group" aria-label="Retention view"><button id="ret-rate" aria-pressed="true">Retention rate</button><button id="ret-diff" aria-pressed="false">Difference</button></div>
+      </div>
+      <div class="chart" id="ret-chart"></div>
+    </div>
+  </section>
+
+  <section id="segments">
+    <div class="head"><div class="eyebrow">Segments · exploratory</div><h2>The lift comes from Android and lower-tier markets</h2>
+      <p class="muted">D7 lift by pre-specified segment, Benjamini–Hochberg corrected. Treat this as a lead for follow-up work: it does not change the decision.</p></div>
+    <div class="panel">
+      <div class="row" style="margin-bottom:8px">
+        <div class="seg" role="group" aria-label="Segment dimension" id="seg-filter"></div>
+        <span class="muted" style="font-size:13px" id="seg-het"></span>
+      </div>
+      <div class="chart" id="seg-chart"></div>
+    </div>
+    <div class="two">
+      <div class="panel"><h3 style="margin-bottom:4px">Novelty check</h3><p class="muted" style="font-size:13px" id="nov-sub"></p><div class="chart" id="nov-chart"></div></div>
+      <div class="panel"><h3 style="margin-bottom:8px">Is the data trustworthy?</h3><dl class="kv" id="validity"></dl></div>
+    </div>
+  </section>
+
+  <section id="value">
+    <div class="head"><div class="eyebrow">Practical significance · per 100k installs</div><h2>What the lift is worth, and what would cancel it</h2>
+      <p class="muted">Change the assumptions to see how the net value moves. Defaults match the readout. Only revenue downside counts against the change; a positive revenue estimate is not counted as a gain.</p></div>
+    <div class="panel calc">
+      <div class="controls">
+        <div><div class="eyebrow" style="margin-bottom:6px">D7 lift scenario</div>
+          <div class="seg" role="group" aria-label="Lift scenario" id="lift-scn"></div></div>
+        <label class="slider" for="m-ret"><span class="top"><span>180-day value multiple of day 7–34 revenue</span><span class="mono" id="m-ret-v"></span></span>
+          <input type="range" id="m-ret" min="1" max="5" step="0.1"></label>
+        <label class="slider" for="m-early"><span class="top"><span>180-day cost per $1 of lost first-week revenue</span><span class="mono" id="m-early-v"></span></span>
+          <input type="range" id="m-early" min="1" max="4" step="0.1"></label>
+        <label class="slider" for="rev"><span class="top"><span>First-week revenue change per player</span><span class="mono" id="rev-v"></span></span>
+          <input type="range" id="rev" min="-30" max="20" step="0.1"></label>
+        <div class="row"><span class="muted" style="font-size:12px" id="rev-ci"></span>
+          <div class="seg" role="group" aria-label="Revenue presets"><button id="rev-zero">No change</button><button id="rev-worst">CI worst case</button></div></div>
+      </div>
+      <div class="detail">
+        <div class="eyebrow">Net value per 100k installs</div>
+        <div class="net num" id="net"></div>
+        <div class="bars" id="bars"></div>
+        <p class="note" id="breakeven"></p>
+        <p class="note" id="value-assume"></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="design">
+    <div class="head"><div class="eyebrow">Design &amp; power</div><h2>Planned before launch, sized for a 1pp lift</h2>
+      <p class="muted">The plan was committed before any treatment-vs-control comparison. Move the slider to see the trade-off between detectable effect and run time.</p></div>
+    <div class="two">
+      <div class="panel">
+        <label class="slider" for="mde"><span class="top"><span>Minimum detectable effect on D7 (absolute)</span><span class="mono" id="mde-v"></span></span>
+          <input type="range" id="mde" min="0" max="1" step="1"></label>
+        <div class="kpis" style="margin-top:12px;grid-template-columns:repeat(auto-fit,minmax(130px,1fr))" id="power-kpis"></div>
+        <div class="chart" id="power-chart" style="margin-top:12px"></div>
+      </div>
+      <div class="panel">
+        <h3 style="margin-bottom:8px">Method</h3>
+        <ul class="plain" style="font-size:13px" id="methods"></ul>
+      </div>
+    </div>
+    <div class="panel"><h3 style="margin-bottom:8px">Limitations</h3>
+      <ul class="plain" style="font-size:13px">
+        <li>Synthetic data with known built-in effects; real behaviour is messier.</li>
+        <li>Short horizon: D7/D14 retention and first-week revenue. Long-term value relies on stated multipliers.</li>
+        <li>The purchase and revenue guardrails are underpowered for their limits, so a pass means no evidence of harm, not proof of none.</li>
+        <li>Segment findings are exploratory; iOS skews towards T1 markets, so platform and country effects overlap.</li>
+        <li>Retention uses UTC calendar days; day-0 sessions (the CUPED covariate) are measured after randomisation.</li>
+      </ul></div>
+  </section>
+
+  <footer>
+    <div><b style="color:var(--fg)">Simulated data.</b> Every number on this page is generated by the project's pipeline (<code>make all</code>) from <code>outputs/tables/results.json</code>; nothing is typed by hand.</div>
+    <div>Full write-ups: <code>docs/01_experiment_plan.md</code> (pre-registration) and <code>docs/02_experiment_readout.md</code> (readout).</div>
+  </footer>
+</div>
+<div id="tip" role="tooltip"></div>
+
+<script>
+const D = {"meta":{"experiment_id":"onb_short_tutorial_v1","enrolment":"01 Sep \u2013 28 Sep 2026","follow_up_days":14,"n_cohort":78901,"srm_p":0.2744192592834368,"control_share":0.5019454759762234,"max_smd":0.013673488740164783,"decision":"SHIP WITH MITIGATION (staged rollout + follow-up fix experiment)","rule":2,"alpha":0.05},"scorecard":[{"role":"Primary","metric":"d7_retained","label":"D7 retention","control":0.17813857186142815,"treatment":0.1897345853373031,"abs_diff":0.011596013475874967,"abs_ci_low":0.006189614092976406,"abs_ci_high":0.017002412858773526,"rel_diff":0.06509546671843403,"rel_ci_low":0.03377065817188185,"rel_ci_high":0.0964202752649862,"p_value":2.624791860688825e-05,"p_adj":2.624791860688825e-05,"p_adj_method":"none (single primary)","threshold_rel":null,"verdict":"Significant increase","boot_abs_ci_low":0.006449324461750173,"boot_abs_ci_high":0.01668251703840948,"boot_rel_ci_low":0.03542494163941133,"boot_rel_ci_high":0.09500665282575708,"mann_whitney_p":null,"method":"two-proportion z-test","n_control":39604,"n_treatment":39297},{"role":"Secondary","metric":"tutorial_complete","label":"Tutorial completion","control":0.5974144025855974,"treatment":0.7737486322111102,"abs_diff":0.17633422962551282,"abs_ci_low":0.1699748431545964,"abs_ci_high":0.18269361609642923,"rel_diff":0.2951623343232801,"rel_ci_low":0.2826087102815408,"rel_ci_high":0.3077159583650194,"p_value":0.0,"p_adj":0.0,"p_adj_method":"Holm","threshold_rel":null,"verdict":"Significant increase","boot_abs_ci_low":0.17016906866039033,"boot_abs_ci_high":0.18248451651333952,"boot_rel_ci_low":0.2829488645191201,"boot_rel_ci_high":0.30722790446220805,"mann_whitney_p":null,"method":"two-proportion z-test","n_control":39604,"n_treatment":39297},{"role":"Secondary","metric":"levels_by_d3","label":"Levels completed by D3","control":6.686067063932936,"treatment":7.11257856833855,"abs_diff":0.4265115044056138,"abs_ci_low":0.33027045404560496,"abs_ci_high":0.5227525547656227,"rel_diff":0.06379108978825099,"rel_ci_low":0.04895010438275102,"rel_ci_high":0.07863207519375096,"p_value":3.820909667497035e-18,"p_adj":7.64181933499407e-18,"p_adj_method":"Holm","threshold_rel":null,"verdict":"Significant increase","boot_abs_ci_low":0.33512511845037746,"boot_abs_ci_high":0.523957134165146,"boot_rel_ci_low":0.04971821763773388,"boot_rel_ci_high":0.07897214122294732,"mann_whitney_p":1.0799488872751745e-18,"method":"Welch t-test","n_control":39604,"n_treatment":39297},{"role":"Secondary","metric":"d1_retained","label":"D1 retention","control":0.376022623977376,"treatment":0.3909458737308191,"abs_diff":0.014923249753443113,"abs_ci_low":0.00813838731229936,"abs_ci_high":0.021708112194586866,"rel_diff":0.03968710604588788,"rel_ci_low":0.021285836091593617,"rel_ci_high":0.058088376000182136,"p_value":1.6285593038917823e-05,"p_adj":1.6285593038917823e-05,"p_adj_method":"Holm","threshold_rel":null,"verdict":"Significant increase","boot_abs_ci_low":0.007956392098478473,"boot_abs_ci_high":0.021565520627903855,"boot_rel_ci_low":0.02112293694369056,"boot_rel_ci_high":0.05778768859067454,"mann_whitney_p":null,"method":"two-proportion z-test","n_control":39604,"n_treatment":39297},{"role":"Guardrail","metric":"purchased_d7","label":"Purchase conversion (first 7 days)","control":0.023457226542773456,"treatment":0.02440389851642619,"abs_diff":0.0009466719736527344,"abs_ci_low":-0.0011862312485320823,"abs_ci_high":0.0030795751958375512,"rel_diff":0.040357370123296876,"rel_ci_low":-0.05238036902661762,"rel_ci_high":0.1330951092732114,"p_value":0.3843138370371588,"p_adj":null,"p_adj_method":"none (CI vs threshold)","threshold_rel":-0.1,"verdict":"PASS","boot_abs_ci_low":-0.001225871351074729,"boot_abs_ci_high":0.0030787460245570277,"boot_rel_ci_low":-0.05060664785837888,"boot_rel_ci_high":0.13772570195653439,"mann_whitney_p":null,"method":"two-proportion z-test","n_control":39604,"n_treatment":39297},{"role":"Guardrail","metric":"revenue_d7","label":"Revenue per player (first 7 days, USD)","control":0.18763761236238763,"treatment":0.20042064279716007,"abs_diff":0.012783030434772441,"abs_ci_low":-0.02218582485412246,"abs_ci_high":0.04775188572366734,"rel_diff":0.06812616230739699,"rel_ci_low":-0.12413483574675502,"rel_ci_high":0.26038716036154896,"p_value":0.47369394961610767,"p_adj":null,"p_adj_method":"none (CI vs threshold)","threshold_rel":-0.1,"verdict":"INCONCLUSIVE","boot_abs_ci_low":-0.02068422503259017,"boot_abs_ci_high":0.04762351737969051,"boot_rel_ci_low":-0.0991732497999148,"boot_rel_ci_high":0.27423868878949564,"mann_whitney_p":0.38021714731167744,"method":"Welch t-test","n_control":39604,"n_treatment":39297},{"role":"Guardrail","metric":"crashed_d7","label":"Crash rate (first 7 days)","control":0.07946167053832946,"treatment":0.07975163498485889,"abs_diff":0.0002899644465294282,"abs_ci_low":-0.0034875217058595266,"abs_ci_high":0.004067450598918383,"rel_diff":0.003649110880314943,"rel_ci_low":-0.043975691768834736,"rel_ci_high":0.05127391352946462,"p_value":0.8804094542946147,"p_adj":null,"p_adj_method":"none (CI vs threshold)","threshold_rel":0.1,"verdict":"PASS","boot_abs_ci_low":-0.003548455214936384,"boot_abs_ci_high":0.0039464068678728365,"boot_rel_ci_low":-0.04406462072243378,"boot_rel_ci_high":0.05045619619340794,"mann_whitney_p":null,"method":"two-proportion z-test","n_control":39604,"n_treatment":39297},{"role":"Guardrail","metric":"avg_session_len","label":"Avg session length (sec, first 7 days)","control":335.21030718976584,"treatment":324.2424395284855,"abs_diff":-10.967867661280366,"abs_ci_low":-14.871358374133774,"abs_ci_high":-7.064376948426958,"rel_diff":-0.03271936281801546,"rel_ci_low":-0.044174861598059355,"rel_ci_high":-0.02126386403797157,"p_value":3.659370449854206e-08,"p_adj":null,"p_adj_method":"none (CI vs threshold)","threshold_rel":-0.05,"verdict":"PASS","boot_abs_ci_low":-14.909910020384647,"boot_abs_ci_high":-6.95743265303066,"boot_rel_ci_low":-0.04420384259115562,"boot_rel_ci_high":-0.02093646473740702,"mann_whitney_p":5.807657835673653e-09,"method":"Welch t-test","n_control":38256,"n_treatment":38076}],"variance":[{"method":"Unadjusted (z-test, Wald CI)","abs_diff":0.011596013475874967,"ci_low":0.006189614092976406,"ci_high":0.017002412858773526,"p_value":2.624791860688825e-05,"ci_width":0.01081279876579712,"ci_width_change_pct":0.0,"cuped_theta":null},{"method":"Bootstrap percentile (2,000 resamples)","abs_diff":0.011596013475874967,"ci_low":0.006449324461750173,"ci_high":0.01668251703840948,"p_value":null,"ci_width":0.01023319257665931,"ci_width_change_pct":-5.360371553119181,"cuped_theta":null},{"method":"CUPED (day-0 sessions)","abs_diff":0.011243335445944663,"ci_low":0.006038541554162365,"ci_high":0.016448129337726963,"p_value":2.298750836275839e-05,"ci_width":0.010409587783564598,"ci_width_change_pct":-3.729015872448793,"cuped_theta":0.07459669892391642},{"method":"OLS: day-0 sessions (HC2)","abs_diff":0.011243367267292137,"ci_low":0.006038620080106377,"ci_high":0.016448114454477896,"p_value":2.296307423266702e-05,"ci_width":0.010409494374371518,"ci_width_change_pct":-3.729879748630194,"cuped_theta":null},{"method":"OLS: day-0 sessions + pre-assignment covariates (HC2)","abs_diff":0.01131965295773545,"ci_low":0.006137934283384306,"ci_high":0.016501371632086592,"p_value":1.8554377157584544e-05,"ci_width":0.010363437348702285,"ci_width_change_pct":-4.1558289100528505,"cuped_theta":null}],"cuped":[{"metric":"d7_retained","corr_with_day0_sessions":0.2705569305360893,"theta":0.07459669892391642,"unadjusted_diff":0.011596013475874967,"unadjusted_ci_width":0.010813101880541283,"cuped_diff":0.011243335445944663,"cuped_ci_width":0.010409587783564598,"ci_width_change_pct":-3.731714557344812,"variance_reduction_pct":7.324171300281035},{"metric":"d1_retained","corr_with_day0_sessions":0.3058973210776206,"theta":0.10585244223553282,"unadjusted_diff":0.014923249753443113,"unadjusted_ci_width":0.013570105102241284,"cuped_diff":0.014422800922201717,"cuped_ci_width":0.01291939953138322,"ci_width_change_pct":-4.795140243612339,"variance_reduction_pct":9.360346535367192},{"metric":"levels_by_d3","corr_with_day0_sessions":0.6577399167888183,"theta":3.2291715092889968,"unadjusted_diff":0.4265115044056138,"unadjusted_ci_width":0.1924821007200177,"cuped_diff":0.4112446378735619,"cuped_ci_width":0.14493108667179755,"ci_width_change_pct":-24.704122549757145,"variance_reduction_pct":43.305305970179276}],"segments":[{"dimension":"platform","segment":"Android","n_control":21888,"n_treatment":21493,"control":0.1602704678362573,"treatment":0.18038431117107895,"abs_diff":0.020113843334821635,"ci_low":0.013039611547315345,"ci_high":0.027188075122327925,"rel_diff":0.12549937369229647,"se":0.0036093682553898577,"p_value":2.5029756330139437e-08,"p_adj_bh":2.002380506411155e-07,"significant_bh":true},{"dimension":"platform","segment":"iOS","n_control":17716,"n_treatment":17804,"control":0.20021449537141567,"treatment":0.20102224219276568,"abs_diff":0.0008077468213500139,"ci_low":-0.007521473280001531,"ci_high":0.009136966922701559,"rel_diff":0.004034407298290521,"se":0.004249680181396888,"p_value":0.8492530461624105,"p_adj_bh":0.8492530461624105,"significant_bh":false},{"dimension":"device_tier","segment":"high","n_control":13355,"n_treatment":13325,"control":0.1992512167727443,"treatment":0.20420262664165104,"abs_diff":0.004951409868906742,"ci_low":-0.004678829789881465,"ci_high":0.014581649527694949,"rel_diff":0.024850085982431214,"se":0.004913477867323231,"p_value":0.31359312432643927,"p_adj_bh":0.4181241657685857,"significant_bh":false},{"dimension":"device_tier","segment":"low","n_control":10542,"n_treatment":10376,"control":0.1515841396319484,"treatment":0.16509252120277565,"abs_diff":0.01350838157082726,"ci_low":0.003614223739918024,"ci_high":0.023402539401736498,"rel_diff":0.08911474250291684,"se":0.0050481324702663375,"p_value":0.007446349956509902,"p_adj_bh":0.012720691245772447,"significant_bh":true},{"dimension":"device_tier","segment":"mid","n_control":15707,"n_treatment":15596,"control":0.17800980454574394,"treatment":0.1937676327263401,"abs_diff":0.01575782818059615,"ci_low":0.007140108936255886,"ci_high":0.024375547424936417,"rel_diff":0.08852224865258362,"se":0.0043968763264609625,"p_value":0.0003389565867064013,"p_adj_bh":0.0009038842312170701,"significant_bh":true},{"dimension":"country_tier","segment":"T1","n_control":11808,"n_treatment":11963,"control":0.1985941734417344,"treatment":0.2027083507481401,"abs_diff":0.004114177306405675,"ci_low":-0.006067892875207025,"ci_high":0.014296247488018375,"rel_diff":0.02071650560086913,"se":0.005195029226010055,"p_value":0.42842197219302847,"p_adj_bh":0.4896251110777468,"significant_bh":false},{"dimension":"country_tier","segment":"T2","n_control":13926,"n_treatment":13586,"control":0.17722246158265115,"treatment":0.18960694832916236,"abs_diff":0.012384486746511214,"ci_low":0.003237402438451043,"ci_high":0.021531571054571385,"rel_diff":0.06988102205507096,"se":0.004666965505596636,"p_value":0.00795043202860778,"p_adj_bh":0.012720691245772447,"significant_bh":true},{"dimension":"country_tier","segment":"T3","n_control":13870,"n_treatment":13748,"control":0.16164383561643836,"treatment":0.17857142857142858,"abs_diff":0.016927592954990217,"ci_low":0.008066511289540152,"ci_high":0.02578867462044028,"rel_diff":0.10472154963680391,"se":0.004521043108620947,"p_value":0.00018119815717570982,"p_adj_bh":0.0007247926287028393,"significant_bh":true}],"heterogeneity":[{"dimension":"platform","Q":11.989626395269426,"df":1,"p_value":0.0005349751396653535,"pooled_effect":0.01202337679307942},{"dimension":"device_tier","Q":2.8664999295462668,"df":2,"p_value":0.23853243913139882,"pooled_effect":0.011710005913802975},{"dimension":"country_tier","Q":3.49041970029175,"df":2,"p_value":0.17460834353555885,"pooled_effect":0.011746279515334843}],"novelty":{"by_week":[{"dimension":"enrolment_week","enrolment_week":1,"n_control":9749,"n_treatment":9643,"control":0.17786439634834342,"treatment":0.19226381831380276,"abs_diff":0.014399421965459347,"ci_low":0.0034684910814739307,"ci_high":0.025330352849444765,"rel_diff":0.08095730377235477,"se":0.005577108033722663,"p_value":0.009826933601246864},{"dimension":"enrolment_week","enrolment_week":2,"n_control":10190,"n_treatment":10173,"control":0.17419038272816487,"treatment":0.18539270618303352,"abs_diff":0.011202323454868657,"ci_low":0.0006545129640974506,"ci_high":0.021750133945639863,"rel_diff":0.06431080338316142,"se":0.0053816348534825075,"p_value":0.037396892801800675},{"dimension":"enrolment_week","enrolment_week":3,"n_control":9850,"n_treatment":9595,"control":0.17522842639593908,"treatment":0.19155810317873892,"abs_diff":0.01632967678279984,"ci_low":0.0054501181737293385,"ci_high":0.02720923539187034,"rel_diff":0.09319079739894454,"se":0.0055508972077482404,"p_value":0.0032558856786968474},{"dimension":"enrolment_week","enrolment_week":4,"n_control":9815,"n_treatment":9886,"control":0.18543046357615894,"treatment":0.18996560793040665,"abs_diff":0.0045351443542477055,"ci_low":-0.0063694821171812,"ci_high":0.01543977082567661,"rel_diff":0.024457385624693018,"se":0.005563687168459833,"p_value":0.41501973740978315}],"Q":2.5958260298878795,"df":3,"p_value":0.45822176768665834,"pooled_effect":0.011611691861540879,"trend_slope_per_week":-0.0024339393004493694,"trend_slope_se":0.002486320909486582,"trend_p_value":0.32761353988445363},"retention":[{"day":0,"control":0.9659630340369659,"treatment":0.968928925872204,"c_lo":0.9641771953822902,"c_hi":0.9677488726916417,"t_lo":0.9672133873792965,"t_hi":0.9706444643651115,"diff":0.002965891835238099,"d_lo":0.0004895908319991903,"d_hi":0.0054421928384770085,"p":0.018925989330247646},{"day":1,"control":0.376022623977376,"treatment":0.3909458737308191,"c_lo":0.37125196958982587,"c_hi":0.38079327836492616,"t_lo":0.3861212590425049,"t_hi":0.39577048841913337,"diff":0.014923249753443113,"d_lo":0.00813838731229936,"d_hi":0.021708112194586866,"p":1.6285593038917823e-05},{"day":2,"control":0.29272295727704273,"treatment":0.3003537165686948,"c_lo":0.28824159846466935,"c_hi":0.2972043160894161,"t_lo":0.2958212757323489,"t_hi":0.3048861574050407,"diff":0.007630759291652078,"d_lo":0.0012570552081396591,"d_hi":0.014004463375164498,"p":0.018950442584004207},{"day":3,"control":0.24563175436824564,"treatment":0.25821309514721225,"c_lo":0.24139219716029897,"c_hi":0.2498713115761923,"t_lo":0.2538859139052387,"t_hi":0.2625402763891858,"diff":0.01258134077896661,"d_lo":0.006523536378739641,"d_hi":0.01863914517919358,"p":4.6922913453824735e-05},{"day":4,"control":0.2234875265124735,"treatment":0.23098455352825917,"c_lo":0.21938465980401353,"c_hi":0.22759039322093347,"t_lo":0.2268174396035792,"t_hi":0.23515166745293914,"diff":0.007497027015785668,"d_lo":0.0016491986244382148,"d_hi":0.013344855407133122,"p":0.011980289902894306},{"day":5,"control":0.20558529441470558,"treatment":0.2172430465429931,"c_lo":0.2016050824032655,"c_hi":0.20956550642614566,"t_lo":0.2131658393441652,"t_hi":0.221320253741821,"diff":0.011657752128287513,"d_lo":0.005959988261716012,"d_hi":0.017355515994859013,"p":6.070940566472874e-05},{"day":6,"control":0.19035955964044035,"treatment":0.20095681604193705,"c_lo":0.18649304207608441,"c_hi":0.1942260772047963,"t_lo":0.19699483065754375,"t_hi":0.20491880142633034,"diff":0.010597256401496696,"d_lo":0.00506135900633001,"d_hi":0.016133153796663382,"p":0.00017551072881206742},{"day":7,"control":0.17813857186142815,"treatment":0.1897345853373031,"c_lo":0.17437010389617122,"c_hi":0.18190703982668507,"t_lo":0.18585787568903375,"t_hi":0.19361129498557247,"diff":0.011596013475874967,"d_lo":0.006189614092976406,"d_hi":0.017002412858773526,"p":2.624791860688825e-05},{"day":8,"control":0.16644783355216644,"treatment":0.17917398274677457,"c_lo":0.16277930409091165,"c_hi":0.17011636301342123,"t_lo":0.1753822352961506,"t_hi":0.18296573019739854,"diff":0.012726149194608127,"d_lo":0.007450314267253744,"d_hi":0.01800198412196251,"p":2.271782883434766e-06},{"day":9,"control":0.16382183617816382,"treatment":0.17673104817161617,"c_lo":0.16017663206911675,"c_hi":0.16746704028721088,"t_lo":0.1729596388682414,"t_hi":0.18050245747499094,"diff":0.012909211993452352,"d_lo":0.007664211507674389,"d_hi":0.018154212479230315,"p":1.4084964748790625e-06},{"day":10,"control":0.15364609635390364,"treatment":0.16627223452171921,"c_lo":0.15009450237029667,"c_hi":0.1571976903375106,"t_lo":0.16259095858456524,"t_hi":0.1699535104588732,"diff":0.012626138167815576,"d_lo":0.007510998799219372,"d_hi":0.01774127753641178,"p":1.3126330552822925e-06},{"day":11,"control":0.1493031006968993,"treatment":0.1615899432526656,"c_lo":0.1457930904530448,"c_hi":0.1528131109407538,"t_lo":0.15795069420804508,"t_hi":0.1652291922972861,"diff":0.012286842555766286,"d_lo":0.007230819807682511,"d_hi":0.017342865303850062,"p":1.908307666474562e-06},{"day":12,"control":0.14003635996364003,"treatment":0.15642415451561187,"c_lo":0.13661855719859967,"c_hi":0.1434541627286804,"t_lo":0.15283253478251022,"t_hi":0.16001577424871352,"diff":0.01638779455197184,"d_lo":0.011429951806486167,"d_hi":0.021345637297457514,"p":9.297773373702452e-11},{"day":13,"control":0.1403898596101404,"treatment":0.15194544112782146,"c_lo":0.13696844913808923,"c_hi":0.14381127008219155,"t_lo":0.14839622777581363,"t_hi":0.1554946544798293,"diff":0.011555581517681074,"d_lo":0.006625868351667595,"d_hi":0.016485294683694553,"p":4.342886274487792e-06},{"day":14,"control":0.13836986163013837,"treatment":0.14830648650024175,"c_lo":0.1349691661868622,"c_hi":0.14177055707341454,"t_lo":0.14479251596273482,"t_hi":0.15182045703774869,"diff":0.009936624870103383,"d_lo":0.005046651491767387,"d_hi":0.01482659824843938,"p":6.811565915558608e-05}],"value":{"install_basis":100000,"extra_d7_retained":1159.6013475874968,"extra_d7_retained_ci_low":618.9614092976406,"extra_d7_retained_ci_high":1700.2412858773525,"n_players_value_window":11155,"rev_d7_d34_retained":1.1354449472096528,"rev_d7_d34_not_retained":0.1710342570368754,"ltv_mult_retained":2.5,"ltv_mult_early_revenue":2.0,"value_per_extra_retained":2.4110267254319435,"gain_central":2795.8298398803513,"gain_low":1492.3324998276312,"gain_high":4099.3271799330705,"early_rev_diff_per_player":0.012783030434772441,"early_rev_change_per_100k":1278.303043477244,"early_rev_change_ci_low":-2218.582485412246,"early_rev_change_ci_high":4775.188572366735,"cost_central":-2556.606086954488,"cost_worst":4437.164970824492,"cost_best":-9550.37714473347,"cost_central_banked":0.0,"net_central":2795.8298398803513,"net_pessimistic":-2944.832470996861,"breakeven_rev_drop_rel":-0.07450078384286618,"control_revenue_d7":0.18763761236238763,"rev_abs_ci_low":-0.02218582485412246,"rev_abs_ci_high":0.04775188572366734},"power":{"summary":{"alpha":0.05,"power":0.8,"baseline_d7":0.18,"design_mde_abs":0.01,"design_mde_rel":0.05555555555555556,"n_per_arm_for_design_mde":23665,"n_total_for_design_mde":47330,"days_for_design_mde":18,"planned_daily_installs":2850,"eligibility_rate":0.97,"planned_enrolment_days":28,"planned_n_per_arm":38703,"mde_abs_at_planned_n":0.007801665096005362,"power_at_design_mde_planned_n":0.9476928889401507},"grid":[{"mde_pp":0.4,"n_per_arm":146060,"days":106},{"mde_pp":0.45,"n_per_arm":115528,"days":84},{"mde_pp":0.5,"n_per_arm":93677,"days":68},{"mde_pp":0.55,"n_per_arm":77500,"days":57},{"mde_pp":0.6,"n_per_arm":65190,"days":48},{"mde_pp":0.65,"n_per_arm":55605,"days":41},{"mde_pp":0.7,"n_per_arm":47996,"days":35},{"mde_pp":0.75,"n_per_arm":41853,"days":31},{"mde_pp":0.8,"n_per_arm":36823,"days":27},{"mde_pp":0.85,"n_per_arm":32653,"days":24},{"mde_pp":0.9,"n_per_arm":29156,"days":22},{"mde_pp":0.95,"n_per_arm":26194,"days":19},{"mde_pp":1.0,"n_per_arm":23665,"days":18},{"mde_pp":1.05,"n_per_arm":21487,"days":16},{"mde_pp":1.1,"n_per_arm":19598,"days":15},{"mde_pp":1.15,"n_per_arm":17949,"days":13},{"mde_pp":1.2,"n_per_arm":16501,"days":12},{"mde_pp":1.25,"n_per_arm":15223,"days":12},{"mde_pp":1.3,"n_per_arm":14089,"days":11},{"mde_pp":1.35,"n_per_arm":13078,"days":10},{"mde_pp":1.4,"n_per_arm":12173,"days":9},{"mde_pp":1.45,"n_per_arm":11359,"days":9},{"mde_pp":1.5,"n_per_arm":10625,"days":8},{"mde_pp":1.55,"n_per_arm":9961,"days":8},{"mde_pp":1.6,"n_per_arm":9357,"days":7},{"mde_pp":1.65,"n_per_arm":8808,"days":7},{"mde_pp":1.7,"n_per_arm":8306,"days":7},{"mde_pp":1.75,"n_per_arm":7845,"days":6},{"mde_pp":1.8,"n_per_arm":7423,"days":6},{"mde_pp":1.85,"n_per_arm":7034,"days":6},{"mde_pp":1.9,"n_per_arm":6675,"days":5},{"mde_pp":1.95,"n_per_arm":6344,"days":5},{"mde_pp":2.0,"n_per_arm":6036,"days":5}],"curve_lifts_pp":[0.0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,0.2,0.22,0.24,0.26,0.28,0.3,0.32,0.34,0.36,0.38,0.4,0.42,0.44,0.46,0.48,0.5,0.52,0.54,0.56,0.58,0.6,0.62,0.64,0.66,0.68,0.7,0.72,0.74,0.76,0.78,0.8,0.82,0.84,0.86,0.88,0.9,0.92,0.94,0.96,0.98,1.0,1.02,1.04,1.06,1.08,1.1,1.12,1.14,1.16,1.18,1.2,1.22,1.24,1.26,1.28,1.3,1.32,1.34,1.36,1.38,1.4,1.42,1.44,1.46,1.48,1.5,1.52,1.54,1.56,1.58,1.6,1.62,1.64,1.66,1.68,1.7,1.72,1.74,1.76,1.78,1.8,1.82,1.84,1.86,1.88,1.9,1.92,1.94,1.96,1.98,2.0],"curves":{"planned":[0.05,0.05060069684518593,0.052404369686010824,0.055417174408535434,0.05964992010247083,0.06511736376728575,0.0718372627140619,0.07982921274760461,0.08911330645180739,0.09970865141384187,0.1116317928579448,0.12489508876298752,0.13950508796007846,0.15546096281014127,0.17275304773264727,0.19136153301555267,0.21125535994633668,0.2323913583827297,0.25471366150552677,0.2781534248072088,0.30262886757296914,0.32804564547147663,0.35429755270751756,0.38126754185568157,0.4088290393742054,0.43684752528039217,0.465182336929467,0.4936886496221398,0.5222195811671129,0.5506283637720295,0.5787705248795626,0.6065060188677159,0.6337012538664835,0.6602309621893699,0.6859798688376172,0.7108441199337772,0.7347324414495483,0.7575670078402797,0.7792840097939159,0.799833919854007,0.8191814638118158,0.8373053141439111,0.8541975291124905,0.869862767221808,0.8843173113791937,0.8975879402602911,0.9097106860138264,0.9207295176151185,0.9306949880046307,0.9396628807893741,0.9476928889401507,0.9548473538091691,0.9611900881533808,0.9667853019116645,0.9716966444681798,0.975986372238816,0.9797146458131674,0.9829389567085633,0.9857136801479867,0.9880897472271224,0.9901144274202803,0.9918312105926249,0.9932797765123837,0.9944960392452055,0.9955122537009321,0.9963571719171239,0.9970562373241785,0.9976318061629892,0.9981033863395309,0.998487885228953,0.9987998592201355,0.9990517590651117,0.999254166321448,0.9994160173150972,0.9995448120818908,0.9996468066522912,0.9997271878188908,0.9997902301687709,0.9998394356779585,0.9998776565616163,0.9999072023629008,0.9999299324589124,0.9999473352778893,0.9999605955717847,0.9999706510859936,0.9999782399255648,0.9999839398457305,0.999988200603455,0.9999913704038819,0.9999937173674679,0.999995446835221,0.999996715224605,0.9999976410499394,0.9999983136302806,0.9999987999257587,0.9999991498705615,0.999999400507117,0.999999579171143,0.9999997059304738,0.999999795441215,0.9999998583519896],"design":[0.05,0.05036724458486673,0.051469326379128016,0.05330820803001259,0.05588768058268943,0.0592131968268289,0.06329164610849825,0.06813107481464745,0.07374035766831331,0.08012882583715022,0.0873058586441979,0.09528044636527314,0.10406073218947606,0.11365354189532467,0.12406391014259686,0.13529461248787658,0.14734571228964227,0.1602141315687945,0.1738932546264542,0.1883725727906592,0.20363737806720753,0.21966851271248858,0.2364421808356955,0.25392982708776396,0.27209808632103905,0.29090880682854053,0.3103191484189909,0.33028175518133784,0.35074500137038545,0.3716533074351981,0.39294752184643306,0.4145653630903104,0.4364419150163252,0.45851016768202546,0.48070159495727216,0.5029467594536953,0.5251759348499906,0.5473197354022091,0.5693097423660707,0.5910791172160562,0.6125631919181315,0.6337000270877216,0.6544309296252855,0.6747009223475986,0.6944591591973129,0.7136592807879727,0.732259706296,0.750223859011285,0.7675203241729495,0.784122939013184,0.8000108161798678,0.8151683028803492,0.8295848791585902,0.8432549996659934,0.8561778840950769,0.8683572621030402,0.8798010790516961,0.8905211692281332,0.9005329033887651,0.9098548174937957,0.9185082293789603,0.9265168498596509,0.9339063943942245,0.940704200965875,0.9469388592943817,0.9526398558796447,0.9578372387274191,0.9625613049328832,0.9668423136173669,0.9707102260440701,0.9741944740944567,0.9773237576807293,0.9801258711116687,0.9826275579272156,0.984854393277198,0.9868306925451545,0.9885794446107018,0.9901222679029335,0.9914793872209134,0.9926696291818244,0.9937104340982448,0.9946178820777514,0.9954067311745042,0.9960904654971351,0.9966813512835409,0.9971904990844891,0.9976279303479744,0.9980026468591017,0.9983227016604695,0.9985952702507661,0.9988267210303309,0.9990226841282521,0.9991881179032438,0.999327372557842,0.9994442504407162,0.999542062734022,0.9996236823311246,0.9996915928045441,0.9997479334448225,0.9997945404186885,0.9998329841501662]},"guardrail_mde":[{"metric":"purchased_d7","mde_rel_pct":12.190883786432622,"threshold_rel_pct":-10.0},{"metric":"revenue_d7","mde_rel_pct":25.17424955904224,"threshold_rel_pct":-10.0},{"metric":"crashed_d7","mde_rel_pct":6.935597612343004,"threshold_rel_pct":10.0},{"metric":"avg_session_len","mde_rel_pct":2.013939964723379,"threshold_rel_pct":-5.0}]},"guardrails":{"purchased_d7":{"kind":"relative","threshold":-0.1,"direction":"lower_is_worse"},"revenue_d7":{"kind":"relative","threshold":-0.1,"direction":"lower_is_worse"},"crashed_d7":{"kind":"relative","threshold":0.1,"direction":"higher_is_worse"},"avg_session_len":{"kind":"relative","threshold":-0.05,"direction":"lower_is_worse"}}};
+const NS = "http://www.w3.org/2000/svg";
+const $ = (s) => document.querySelector(s);
+const BIN = new Set(["d7_retained", "d1_retained", "tutorial_complete", "purchased_d7", "crashed_d7"]);
+
+/* ---------- formatting ---------- */
+const sgn = (x) => (x > 0 ? "+" : x < 0 ? "−" : "±");
+const pct = (x, d = 2) => `${(100 * x).toFixed(d)}%`;
+const pp = (x, d = 2) => `${sgn(x)}${Math.abs(100 * x).toFixed(d)}pp`;
+const rel = (x, d = 1) => `${sgn(x)}${Math.abs(100 * x).toFixed(d)}%`;
+const fp = (p) => (p == null ? "–" : p < 1e-4 ? "< 0.0001" : p.toFixed(4));
+const usd = (x) => `${x < 0 ? "−" : ""}$${Math.abs(x).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
+const int = (x) => Math.round(x).toLocaleString("en-US");
+function fval(m, x) {
+  if (BIN.has(m)) return pct(x);
+  if (m === "revenue_d7") return `$${x.toFixed(3)}`;
+  if (m === "avg_session_len") return `${x.toFixed(1)}s`;
+  return x.toFixed(2);
+}
+function fdiff(m, x) {
+  if (BIN.has(m)) return pp(x);
+  if (m === "revenue_d7") return `${sgn(x)}$${Math.abs(x).toFixed(3)}`;
+  if (m === "avg_session_len") return `${sgn(x)}${Math.abs(x).toFixed(1)}s`;
+  return `${sgn(x)}${Math.abs(x).toFixed(2)}`;
+}
+function verdictPill(v) {
+  const cls = v === "PASS" || v === "Significant increase" ? "good" : v === "INCONCLUSIVE" ? "warn"
+    : v === "FAIL" || v === "Significant decrease" ? "bad" : "neutral";
+  return `<span class="pill ${cls}">${v}</span>`;
+}
+
+/* ---------- svg + tooltip helpers ---------- */
+function el(tag, attrs, parent) {
+  const n = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs || {})) n.setAttribute(k, v);
+  if (parent) parent.appendChild(n);
+  return n;
+}
+function text(parent, x, y, str, attrs = {}) {
+  const t = el("text", { x, y, style: `fill:var(${attrs.color || "--muted"});font-size:${attrs.size || 11}px;font-family:${attrs.mono ? "var(--font-mono)" : "var(--font-body)"};${attrs.weight ? "font-weight:" + attrs.weight : ""}`, "text-anchor": attrs.anchor || "start", "dominant-baseline": attrs.baseline || "middle" }, parent);
+  t.textContent = str;
+  return t;
+}
+const tip = $("#tip");
+function showTip(html, ev) {
+  tip.innerHTML = html; tip.classList.add("on");
+  const pad = 14, r = tip.getBoundingClientRect();
+  let x = ev.clientX + pad, y = ev.clientY + pad;
+  if (x + r.width > window.innerWidth - 8) x = ev.clientX - r.width - pad;
+  if (y + r.height > window.innerHeight - 8) y = ev.clientY - r.height - pad;
+  tip.style.left = `${Math.max(8, x)}px`; tip.style.top = `${Math.max(8, y)}px`;
+}
+const hideTip = () => tip.classList.remove("on");
+const scale = (d0, d1, r0, r1) => (v) => r0 + ((v - d0) / (d1 - d0)) * (r1 - r0);
+function newSvg(host, w, h) { host.innerHTML = ""; return el("svg", { viewBox: `0 0 ${w} ${h}`, role: "img" }, host); }
+
+/* ---------- hero ---------- */
+const S = Object.fromEntries(D.scorecard.map((r) => [r.metric, r]));
+function renderHero() {
+  const m = D.meta, p = S.d7_retained, rv = S.revenue_d7;
+  $("#exp-id").textContent = m.experiment_id;
+  $("#hero-eyebrow").textContent = `Free-to-play puzzle game · ${m.enrolment} · ${int(m.n_cohort)} players · 50/50 split`;
+  $("#decision-pill").textContent = m.decision;
+  $("#decision-rule").textContent = `Pre-registered decision rule ${m.rule}`;
+  $("#hero-lede").textContent = `Replacing the 7-step forced tutorial with a 3-step learn-by-playing flow raised D7 retention from ${pct(p.control)} to ${pct(p.treatment)}. `
+    + `First-week revenue is the one guardrail we cannot clear: its confidence interval (${rel(rv.rel_ci_low)} to ${rel(rv.rel_ci_high)}) still includes the −10% limit, so the change rolls out in stages with a holdback.`;
+  const v = D.value;
+  const k = [
+    { big: pp(p.abs_diff), lab: "D7 retention lift", sub: `95% CI ${pp(p.abs_ci_low)} to ${pp(p.abs_ci_high)} · p ${fp(p.p_value)}` },
+    { big: int(v.extra_d7_retained), lab: "Extra D7-retained players", sub: `per 100k installs (${int(v.extra_d7_retained_ci_low)} to ${int(v.extra_d7_retained_ci_high)})` },
+    { big: pp(S.tutorial_complete.abs_diff, 1), lab: "Tutorial completion", sub: `${pct(S.tutorial_complete.control, 1)} → ${pct(S.tutorial_complete.treatment, 1)}` },
+    { big: rel(rv.rel_diff), lab: "First-week revenue", sub: `Inconclusive · CI ${rel(rv.rel_ci_low)} to ${rel(rv.rel_ci_high)}` },
+  ];
+  $("#kpis").innerHTML = k.map((x) => `<div class="kpi"><span class="eyebrow">${x.lab}</span><span class="big num">${x.big}</span><span class="sub">${x.sub}</span></div>`).join("");
+}
+
+/* ---------- scorecard chart ---------- */
+let selected = "d7_retained";
+function renderScore() {
+  const host = $("#score-chart"), W = Math.max(300, host.clientWidth), rowH = 46, top = 8, H = top + D.scorecard.length * rowH + 26;
+  const svg = newSvg(host, W, H), lim = 0.15, x = scale(-lim, lim, 8, W - 8);
+  for (const t of [-0.15, -0.1, -0.05, 0, 0.05, 0.1, 0.15]) {
+    el("line", { x1: x(t), x2: x(t), y1: top, y2: H - 22, style: `stroke:var(${t === 0 ? "--muted" : "--grid"});stroke-width:1` }, svg);
+    text(svg, x(t), H - 10, t === 0 ? "0%" : rel(t, 0), { anchor: "middle", mono: true });
+  }
+  D.scorecard.forEach((r, i) => {
+    const y0 = top + i * rowH, yl = y0 + 12, yb = y0 + 31, g = el("g", { tabindex: 0, role: "button", "aria-label": `${r.label}: ${r.verdict}`, style: "cursor:pointer" }, svg);
+    el("rect", { x: 0, y: y0, width: W, height: rowH, rx: 6, style: `fill:${r.metric === selected ? "var(--neutral-bg)" : "transparent"}` }, g);
+    text(g, 8, yl, `${r.role} · ${r.label}`, { color: "--fg", size: 12, weight: r.metric === selected ? 600 : 400 });
+    text(g, W - 8, yl, r.verdict, { anchor: "end", size: 11, color: r.verdict === "INCONCLUSIVE" ? "--warn" : r.verdict === "Not significant" ? "--muted" : "--good", weight: 600 });
+    const col = r.role === "Guardrail" ? "--control" : "--treat";
+    const lo = Math.max(r.rel_ci_low, -lim), hi = Math.min(r.rel_ci_high, lim);
+    if (r.rel_diff > lim) {
+      el("line", { x1: x(lim) - 34, x2: x(lim) - 4, y1: yb, y2: yb, style: `stroke:var(${col});stroke-width:2.5;stroke-linecap:round` }, g);
+      el("path", { d: `M${x(lim)} ${yb} l-8 -5 v10 z`, style: `fill:var(${col})` }, g);
+      text(g, x(lim) - 40, yb, `${rel(r.rel_diff)} (off scale)`, { anchor: "end", mono: true });
+    } else {
+      el("line", { x1: x(lo), x2: x(hi), y1: yb, y2: yb, style: `stroke:var(${col});stroke-width:3;stroke-linecap:round` }, g);
+      if (r.rel_ci_high > lim) el("path", { d: `M${x(lim)} ${yb} l-8 -5 v10 z`, style: `fill:var(${col})` }, g);
+      if (r.rel_ci_low < -lim) el("path", { d: `M${x(-lim)} ${yb} l8 -5 v10 z`, style: `fill:var(${col})` }, g);
+      el("circle", { cx: x(r.rel_diff), cy: yb, r: 5.5, style: `fill:var(${col});stroke:var(--surface);stroke-width:2` }, g);
+    }
+    if (r.role === "Guardrail" && r.threshold_rel != null) el("line", { x1: x(r.threshold_rel), x2: x(r.threshold_rel), y1: yb - 8, y2: yb + 8, style: "stroke:var(--thresh);stroke-width:3" }, g);
+    const pick = () => { selected = r.metric; renderScore(); renderDetail(); };
+    g.addEventListener("click", pick);
+    g.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); } });
+    g.addEventListener("mousemove", (e) => showTip(`<b>${r.label}</b><br>${rel(r.rel_diff)} [${rel(r.rel_ci_low)}, ${rel(r.rel_ci_high)}]${r.threshold_rel != null ? `<br>Limit: ${rel(r.threshold_rel, 0)}` : ""}`, e));
+    g.addEventListener("mouseleave", hideTip);
+  });
+}
+const NOTES = {
+  d7_retained: "Primary metric. Single pre-registered test, so no multiplicity correction.",
+  tutorial_complete: "Secondary. The mechanism: a shorter flow is finished far more often.",
+  levels_by_d3: "Secondary. Players reach real levels sooner. CUPED on day-0 sessions narrows this CI by a quarter.",
+  d1_retained: "Secondary. The lift is visible from the first day after install.",
+  purchased_d7: "Guardrail. Passes, but the test could only detect a drop of about 12%, so read it as no evidence of harm rather than proof of none.",
+  revenue_d7: "Guardrail. Revenue is heavy-tailed, so its interval is wide and still crosses the −10% limit. This is what triggers the staged rollout.",
+  crashed_d7: "Guardrail. No sign of a stability change.",
+  avg_session_len: "Guardrail. Sessions are significantly shorter, but well within the −5% tolerance: one long forced-tutorial session is gone.",
+};
+function renderDetail() {
+  const r = S[selected];
+  const rows = [
+    ["Control", fval(r.metric, r.control)], ["Treatment", fval(r.metric, r.treatment)],
+    ["Absolute difference", fdiff(r.metric, r.abs_diff)], ["95% CI", `${fdiff(r.metric, r.abs_ci_low)} to ${fdiff(r.metric, r.abs_ci_high)}`],
+    ["Relative difference", rel(r.rel_diff)], ["Relative 95% CI", `${rel(r.rel_ci_low)} to ${rel(r.rel_ci_high)}`],
+    ["Bootstrap CI (relative)", `${rel(r.boot_rel_ci_low)} to ${rel(r.boot_rel_ci_high)}`],
+    ["p-value", fp(r.p_value)],
+  ];
+  if (r.role === "Secondary") rows.push(["Holm-adjusted p", fp(r.p_adj)]);
+  if (r.mann_whitney_p != null) rows.push(["Mann–Whitney p", fp(r.mann_whitney_p)]);
+  if (r.role === "Guardrail") rows.push(["Unacceptable if worse than", rel(r.threshold_rel, 0)]);
+  rows.push(["Players (C / T)", `${int(r.n_control)} / ${int(r.n_treatment)}`], ["Test", r.method]);
+  $("#metric-detail").innerHTML = `<div class="row"><div><div class="eyebrow">${r.role}</div><h3>${r.label}</h3></div>${verdictPill(r.verdict)}</div>
+    <dl class="kv">${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl><p class="note">${NOTES[r.metric] || ""}</p>`;
+}
+
+/* ---------- retention ---------- */
+let retMode = "rate";
+function renderRetention() {
+  const ret = D.retention.filter((d) => d.day >= 1), d0 = D.retention[0], d7 = D.retention.find((d) => d.day === 7), d14 = D.retention.find((d) => d.day === 14);
+  $("#ret-title").textContent = `The gap opens on day 1 and holds through day 14`;
+  $("#ret-sub").textContent = `D7: ${pct(d7.control)} vs ${pct(d7.treatment)}. D14 gap still ${pp(d14.diff)} (CI ${pp(d14.d_lo)} to ${pp(d14.d_hi)}). Install day (D0): ${pct(d0.control, 1)} vs ${pct(d0.treatment, 1)}.`;
+  $("#ret-legend").innerHTML = retMode === "rate"
+    ? `<span><span class="dot" style="background:var(--control)"></span>Control · 7-step tutorial</span><span><span class="dot" style="background:var(--treat)"></span>Treatment · 3-step onboarding</span><span>Shaded: 95% CI</span>`
+    : `<span><span class="dot" style="background:var(--treat)"></span>Treatment − control, pp (95% CI)</span>`;
+  const host = $("#ret-chart"), W = Math.max(300, host.clientWidth), H = Math.round(Math.min(380, Math.max(240, W * 0.45)));
+  const m = { l: 44, r: 12, t: 10, b: 30 }, svg = newSvg(host, W, H);
+  const x = scale(1, 14, m.l, W - m.r);
+  let y, ticks;
+  if (retMode === "rate") {
+    const lo = Math.floor(Math.min(...ret.map((d) => d.c_lo)) * 50) / 50, hi = Math.ceil(Math.max(...ret.map((d) => d.t_hi)) * 50) / 50;
+    y = scale(lo, hi, H - m.b, m.t); ticks = []; for (let t = lo; t <= hi + 1e-9; t += 0.05) ticks.push(t);
+  } else {
+    const lo = Math.min(0, ...ret.map((d) => d.d_lo)), hi = Math.max(...ret.map((d) => d.d_hi));
+    const l2 = Math.floor(lo * 200) / 200, h2 = Math.ceil(hi * 200) / 200;
+    y = scale(l2, h2, H - m.b, m.t); ticks = []; for (let t = l2; t <= h2 + 1e-9; t += 0.005) ticks.push(t);
+  }
+  for (const t of ticks) {
+    el("line", { x1: m.l, x2: W - m.r, y1: y(t), y2: y(t), style: `stroke:var(${retMode === "diff" && Math.abs(t) < 1e-9 ? "--muted" : "--grid"})` }, svg);
+    text(svg, m.l - 6, y(t), retMode === "rate" ? `${Math.round(t * 100)}%` : `${(t * 100).toFixed(1)}`, { anchor: "end", mono: true });
+  }
+  for (let d = 1; d <= 14; d++) text(svg, x(d), H - 12, `D${d}`, { anchor: "middle", mono: true, size: W < 480 ? 9 : 11 });
+  if (retMode === "rate") {
+    for (const [arm, lo, hi, col] of [["control", "c_lo", "c_hi", "--control"], ["treatment", "t_lo", "t_hi", "--treat"]]) {
+      const band = ret.map((d) => `${x(d.day)},${y(d[hi])}`).concat(ret.slice().reverse().map((d) => `${x(d.day)},${y(d[lo])}`)).join(" ");
+      el("polygon", { points: band, style: `fill:var(${col});opacity:.15` }, svg);
+      el("polyline", { points: ret.map((d) => `${x(d.day)},${y(d[arm])}`).join(" "), style: `fill:none;stroke:var(${col});stroke-width:2.5;stroke-linejoin:round` }, svg);
+      for (const d of ret) el("circle", { cx: x(d.day), cy: y(d[arm]), r: 3.5, style: `fill:var(${col});stroke:var(--surface);stroke-width:1.5` }, svg);
+    }
+  } else {
+    for (const d of ret) {
+      el("line", { x1: x(d.day), x2: x(d.day), y1: y(d.d_lo), y2: y(d.d_hi), style: "stroke:var(--treat);stroke-width:2.5;stroke-linecap:round" }, svg);
+      el("circle", { cx: x(d.day), cy: y(d.diff), r: 5, style: "fill:var(--treat);stroke:var(--surface);stroke-width:2" }, svg);
+    }
+  }
+  const guide = el("line", { y1: m.t, y2: H - m.b, style: "stroke:var(--muted);stroke-dasharray:3 3;opacity:0" }, svg);
+  const hit = el("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: H - m.t - m.b, style: "fill:transparent" }, svg);
+  hit.addEventListener("mousemove", (e) => {
+    const box = svg.getBoundingClientRect(), px = ((e.clientX - box.left) / box.width) * W;
+    const day = Math.min(14, Math.max(1, Math.round(1 + ((px - m.l) / (W - m.l - m.r)) * 13))), d = ret[day - 1];
+    guide.setAttribute("x1", x(day)); guide.setAttribute("x2", x(day)); guide.style.opacity = 1;
+    showTip(`<b>Day ${day}</b><br>Control ${pct(d.control)}<br>Treatment ${pct(d.treatment)}<br>Difference ${pp(d.diff)} [${pp(d.d_lo)}, ${pp(d.d_hi)}]`, e);
+  });
+  hit.addEventListener("mouseleave", () => { guide.style.opacity = 0; hideTip(); });
+}
+for (const [id, mode] of [["#ret-rate", "rate"], ["#ret-diff", "diff"]]) {
+  $(id).addEventListener("click", () => { retMode = mode; $("#ret-rate").setAttribute("aria-pressed", mode === "rate"); $("#ret-diff").setAttribute("aria-pressed", mode === "diff"); renderRetention(); });
+}
+
+/* ---------- segments ---------- */
+const DIMS = { all: "All", platform: "Platform", device_tier: "Device tier", country_tier: "Country tier" };
+let segDim = "all";
+function renderSegFilter() {
+  $("#seg-filter").innerHTML = Object.entries(DIMS).map(([k, v]) => `<button data-dim="${k}" aria-pressed="${k === segDim}">${v}</button>`).join("");
+  $("#seg-filter").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { segDim = b.dataset.dim; renderSegFilter(); renderSegments(); }));
+}
+function renderSegments() {
+  const het = Object.fromEntries(D.heterogeneity.map((h) => [h.dimension, h.p_value]));
+  $("#seg-het").textContent = segDim === "all"
+    ? `Heterogeneity p: platform ${fp(het.platform)} · device ${fp(het.device_tier)} · country ${fp(het.country_tier)}`
+    : `Do the effects differ within ${DIMS[segDim].toLowerCase()}? Cochran's Q p = ${fp(het[segDim])}`;
+  const p = S.d7_retained;
+  const rows = [{ name: "Overall", abs_diff: p.abs_diff, ci_low: p.abs_ci_low, ci_high: p.abs_ci_high, overall: true, control: p.control, treatment: p.treatment, n_control: p.n_control, n_treatment: p.n_treatment }]
+    .concat(D.segments.filter((s) => segDim === "all" || s.dimension === segDim).map((s) => ({ ...s, name: `${DIMS[s.dimension]}: ${s.segment}` })));
+  const host = $("#seg-chart"), W = Math.max(300, host.clientWidth), narrow = W < 560, L = narrow ? 8 : 150, R = narrow ? 8 : 150;
+  const rowH = narrow ? 44 : 30, H = rowH * rows.length + 30, svg = newSvg(host, W, H);
+  const x = scale(-0.015, 0.03, L, W - R);
+  for (let t = -0.01; t <= 0.03 + 1e-9; t += 0.01) {
+    el("line", { x1: x(t), x2: x(t), y1: 0, y2: H - 24, style: `stroke:var(${Math.abs(t) < 1e-9 ? "--muted" : "--grid"})` }, svg);
+    text(svg, x(t), H - 10, `${t > 0 ? "+" : ""}${(t * 100).toFixed(0)}pp`, { anchor: "middle", mono: true });
+  }
+  el("line", { x1: x(p.abs_diff), x2: x(p.abs_diff), y1: 0, y2: H - 24, style: "stroke:var(--muted);stroke-dasharray:3 3" }, svg);
+  rows.forEach((r, i) => {
+    const yc = i * rowH + (narrow ? 30 : rowH / 2), g = el("g", {}, svg), col = r.overall ? "--fg" : "--treat";
+    const label = narrow ? [8, i * rowH + 11, "start"] : [L - 10, yc, "end"];
+    text(g, label[0], label[1], r.name, { anchor: label[2], color: "--fg", size: 12, weight: r.overall ? 600 : 400 });
+    const tail = r.overall ? pp(r.abs_diff) : `${pp(r.abs_diff)} · BH p ${fp(r.p_adj_bh)}`;
+    text(g, narrow ? W - 8 : W - R + 10, narrow ? i * rowH + 11 : yc, tail, { anchor: narrow ? "end" : "start", mono: true, size: 11 });
+    el("line", { x1: x(r.ci_low), x2: x(r.ci_high), y1: yc, y2: yc, style: `stroke:var(${col});stroke-width:3;stroke-linecap:round` }, g);
+    if (r.overall) el("path", { d: `M${x(r.abs_diff)} ${yc - 7} l7 7 l-7 7 l-7 -7 z`, style: "fill:var(--fg)" }, g);
+    else el("circle", { cx: x(r.abs_diff), cy: yc, r: 5, style: `fill:var(${col});stroke:var(--surface);stroke-width:2` }, g);
+    el("rect", { x: 0, y: i * rowH, width: W, height: rowH, style: "fill:transparent" }, g);
+    g.addEventListener("mousemove", (e) => showTip(`<b>${r.name}</b><br>Control ${pct(r.control)} → Treatment ${pct(r.treatment)}<br>Lift ${pp(r.abs_diff)} [${pp(r.ci_low)}, ${pp(r.ci_high)}]${r.overall ? "" : `<br>BH-adjusted p ${fp(r.p_adj_bh)}`}<br>n ${int(r.n_control)} / ${int(r.n_treatment)}`, e));
+    g.addEventListener("mouseleave", hideTip);
+  });
+}
+
+/* ---------- novelty + validity ---------- */
+function renderNovelty() {
+  const w = D.novelty.by_week, p = S.d7_retained;
+  $("#nov-sub").textContent = `D7 lift by enrolment week. No significant trend (${pp(D.novelty.trend_slope_per_week)} per week, p ${fp(D.novelty.trend_p_value)}); weeks differ by no more than chance (p ${fp(D.novelty.p_value)}).`;
+  const host = $("#nov-chart"), W = Math.max(260, host.clientWidth), H = 200, m = { l: 40, r: 10, t: 10, b: 28 }, svg = newSvg(host, W, H);
+  const x = scale(0.5, 4.5, m.l, W - m.r), y = scale(-0.01, 0.03, H - m.b, m.t);
+  for (let t = -0.01; t <= 0.03 + 1e-9; t += 0.01) {
+    el("line", { x1: m.l, x2: W - m.r, y1: y(t), y2: y(t), style: `stroke:var(${Math.abs(t) < 1e-9 ? "--muted" : "--grid"})` }, svg);
+    text(svg, m.l - 6, y(t), `${(t * 100).toFixed(0)}pp`, { anchor: "end", mono: true });
+  }
+  el("line", { x1: m.l, x2: W - m.r, y1: y(p.abs_diff), y2: y(p.abs_diff), style: "stroke:var(--muted);stroke-dasharray:3 3" }, svg);
+  w.forEach((r) => {
+    const g = el("g", {}, svg), cx = x(r.enrolment_week);
+    text(svg, cx, H - 10, `Week ${r.enrolment_week}`, { anchor: "middle", size: 11 });
+    el("line", { x1: cx, x2: cx, y1: y(r.ci_low), y2: y(r.ci_high), style: "stroke:var(--treat);stroke-width:3;stroke-linecap:round" }, g);
+    el("circle", { cx, cy: y(r.abs_diff), r: 5.5, style: "fill:var(--treat);stroke:var(--surface);stroke-width:2" }, g);
+    el("rect", { x: cx - 30, y: m.t, width: 60, height: H - m.t - m.b, style: "fill:transparent" }, g);
+    g.addEventListener("mousemove", (e) => showTip(`<b>Enrolment week ${r.enrolment_week}</b><br>Lift ${pp(r.abs_diff)} [${pp(r.ci_low)}, ${pp(r.ci_high)}]<br>n ${int(r.n_control)} / ${int(r.n_treatment)}`, e));
+    g.addEventListener("mouseleave", hideTip);
+  });
+  const m2 = D.meta, cup = D.variance.find((v) => v.method.startsWith("CUPED"));
+  const rows = [
+    ["Sample-ratio mismatch p", `${fp(m2.srm_p)} (no alarm)`], ["Control share", pct(m2.control_share)],
+    ["Largest covariate imbalance (SMD)", m2.max_smd.toFixed(3)], ["Bootstrap CI for D7 lift", `${pp(S.d7_retained.boot_abs_ci_low)} to ${pp(S.d7_retained.boot_abs_ci_high)}`],
+    ["CUPED CI for D7 lift", `${pp(cup.ci_low)} to ${pp(cup.ci_high)}`], ["CUPED CI narrowing", `${Math.abs(cup.ci_width_change_pct).toFixed(1)}%`],
+  ];
+  $("#validity").innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("");
+}
+
+/* ---------- value calculator ---------- */
+const V = D.value;
+const valueState = { lift: "central", mRet: V.ltv_mult_retained, mEarly: V.ltv_mult_early_revenue, revCents: 0 };
+const LIFTS = { low: ["Low (CI)", S.d7_retained.abs_ci_low], central: ["Central", S.d7_retained.abs_diff], high: ["High (CI)", S.d7_retained.abs_ci_high] };
+function renderValue() {
+  $("#lift-scn").innerHTML = Object.entries(LIFTS).map(([k, [lab, v]]) => `<button data-k="${k}" aria-pressed="${k === valueState.lift}">${lab} ${pp(v)}</button>`).join("");
+  $("#lift-scn").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { valueState.lift = b.dataset.k; renderValue(); }));
+  const lift = LIFTS[valueState.lift][1], perRet = (V.rev_d7_d34_retained - V.rev_d7_d34_not_retained) * valueState.mRet;
+  const gain = lift * V.install_basis * perRet;
+  const revChange = valueState.revCents / 100;
+  const cost = Math.max(0, -revChange) * V.install_basis * valueState.mEarly;
+  const net = gain - cost;
+  $("#m-ret").value = valueState.mRet; $("#m-ret-v").textContent = `${valueState.mRet.toFixed(1)}×`;
+  $("#m-early").value = valueState.mEarly; $("#m-early-v").textContent = `${valueState.mEarly.toFixed(1)}×`;
+  $("#rev").value = valueState.revCents;
+  $("#rev-v").textContent = `${sgn(revChange)}${Math.abs(valueState.revCents).toFixed(1)}¢ (${rel(revChange / V.control_revenue_d7)})`;
+  $("#rev-ci").textContent = `Observed: ${sgn(V.early_rev_diff_per_player)}${Math.abs(100 * V.early_rev_diff_per_player).toFixed(2)}¢, 95% CI ${(100 * V.rev_abs_ci_low).toFixed(2)}¢ to ${sgn(V.rev_abs_ci_high)}${(100 * V.rev_abs_ci_high).toFixed(2)}¢ per player (control: $${V.control_revenue_d7.toFixed(3)})`;
+  const netEl = $("#net"); netEl.textContent = usd(net); netEl.style.color = net >= 0 ? "var(--good)" : "var(--bad)";
+  const maxAbs = Math.max(1, Math.abs(gain), Math.abs(cost), Math.abs(net));
+  const bar = (lab, v, col) => {
+    const w = (Math.abs(v) / maxAbs) * 50, left = v >= 0 ? 50 : 50 - w;
+    return `<div class="bar"><span>${lab}</span><div class="track"><div class="fill" style="left:${left}%;width:${w}%;background:var(${col})"></div><div class="zero"></div></div><span class="v">${usd(v)}</span></div>`;
+  };
+  $("#bars").innerHTML = bar("Retention value", gain, "--good") + bar("Revenue at risk", -cost, "--bad") + bar("Net", net, net >= 0 ? "--good" : "--bad");
+  const breakevenRel = gain / (valueState.mEarly * V.install_basis * V.control_revenue_d7);
+  $("#breakeven").textContent = `Break-even: a sustained first-week revenue drop of ${(100 * breakevenRel).toFixed(1)}% (${(100 * breakevenRel * V.control_revenue_d7).toFixed(2)}¢ per player) would cancel this retention value.`;
+  $("#value-assume").textContent = `Value per extra retained player: observed day 7–34 revenue gap between retained and churned control players ($${V.rev_d7_d34_retained.toFixed(2)} vs $${V.rev_d7_d34_not_retained.toFixed(2)}, ${int(V.n_players_value_window)} players) × ${valueState.mRet.toFixed(1)} = $${perRet.toFixed(2)}. Gross revenue only.`;
+}
+$("#m-ret").addEventListener("input", (e) => { valueState.mRet = +e.target.value; renderValue(); });
+$("#m-early").addEventListener("input", (e) => { valueState.mEarly = +e.target.value; renderValue(); });
+$("#rev").addEventListener("input", (e) => { valueState.revCents = +e.target.value; renderValue(); });
+$("#rev-zero").addEventListener("click", () => { valueState.revCents = 0; renderValue(); });
+$("#rev-worst").addEventListener("click", () => { valueState.revCents = V.rev_abs_ci_low * 100; valueState.lift = "low"; renderValue(); });
+
+/* ---------- power explorer ---------- */
+const P = D.power, grid = P.grid;
+let mdeIdx = grid.findIndex((g) => Math.abs(g.mde_pp - 1.0) < 1e-9);
+function renderPower() {
+  const g = grid[mdeIdx], s = P.summary;
+  $("#mde").max = grid.length - 1; $("#mde").value = mdeIdx;
+  $("#mde-v").textContent = `${g.mde_pp.toFixed(2)}pp (${(g.mde_pp / (100 * s.baseline_d7) * 100).toFixed(1)}% relative)`;
+  $("#power-kpis").innerHTML = [
+    [int(g.n_per_arm), "players per arm"], [int(2 * g.n_per_arm), "players total"], [`${g.days} days`, `at ${int(s.planned_daily_installs)} installs/day`],
+  ].map(([b, l]) => `<div class="kpi"><span class="big num" style="font-size:24px">${b}</span><span class="sub">${l}</span></div>`).join("");
+  const host = $("#power-chart"), W = Math.max(280, host.clientWidth), H = 220, m = { l: 40, r: 10, t: 8, b: 30 }, svg = newSvg(host, W, H);
+  const x = scale(0, 2, m.l, W - m.r), y = scale(0, 1, H - m.b, m.t);
+  for (const t of [0, 0.2, 0.4, 0.6, 0.8, 1]) { el("line", { x1: m.l, x2: W - m.r, y1: y(t), y2: y(t), style: `stroke:var(${t === 0.8 ? "--muted" : "--grid"});${t === 0.8 ? "stroke-dasharray:4 3" : ""}` }, svg); text(svg, m.l - 6, y(t), `${t * 100}%`, { anchor: "end", mono: true }); }
+  for (const t of [0, 0.5, 1, 1.5, 2]) text(svg, x(t), H - 12, `${t}pp`, { anchor: "middle", mono: true });
+  el("polyline", { points: P.curve_lifts_pp.map((l, i) => `${x(l)},${y(P.curves.planned[i])}`).join(" "), style: "fill:none;stroke:var(--control);stroke-width:2.5" }, svg);
+  el("line", { x1: x(g.mde_pp), x2: x(g.mde_pp), y1: m.t, y2: H - m.b, style: "stroke:var(--treat);stroke-width:2" }, svg);
+  el("line", { x1: x(S.d7_retained.abs_diff * 100), x2: x(S.d7_retained.abs_diff * 100), y1: m.t, y2: H - m.b, style: "stroke:var(--muted);stroke-dasharray:2 3" }, svg);
+  text(svg, x(g.mde_pp) + 5, m.t + 8, "your MDE", { color: "--treat", size: 11 });
+  text(svg, W - m.r, y(0.12), `Blue: power of the actual 28-day run (${int(s.planned_n_per_arm)}/arm)`, { anchor: "end", size: 10.5 });
+  text(svg, W - m.r, y(0.04), `Dotted: observed lift ${pp(S.d7_retained.abs_diff)}`, { anchor: "end", size: 10.5 });
+}
+$("#mde").addEventListener("input", (e) => { mdeIdx = +e.target.value; renderPower(); });
+function renderMethods() {
+  const s = P.summary, gm = Object.fromEntries(P.guardrail_mde.map((g) => [g.metric, g]));
+  $("#methods").innerHTML = [
+    `Player-level 50/50 randomisation at first launch; intention-to-treat on ${int(D.meta.n_cohort)} eligible players after SQL de-duplication and pre-registered bot and assignment rules.`,
+    `Sample size: ${int(s.n_per_arm_for_design_mde)} per arm for a ${(100 * s.design_mde_abs).toFixed(1)}pp MDE at 80% power (Cohen's h, matches statsmodels). Ran 28 days for four full weekly cycles.`,
+    "Primary: two-proportion z-test with Wald CI, delta-method relative CI, bootstrap check, CUPED and OLS as precision analyses.",
+    "Secondaries: Holm-corrected. Segments: Benjamini–Hochberg plus Cochran's Q. Novelty: lift by enrolment week.",
+    `Guardrails judged on the CI against a pre-set limit. Purchase and revenue are underpowered (detectable drop ≈ ${gm.purchased_d7.mde_rel_pct.toFixed(0)}% and ${gm.revenue_d7.mde_rel_pct.toFixed(0)}%).`,
+    "Validation: the simulator's true effects fall inside the estimated intervals (checked by an automated test, never read by the analysis).",
+  ].map((t) => `<li>${t}</li>`).join("");
+}
+
+/* ---------- boot ---------- */
+function renderCharts() { renderScore(); renderRetention(); renderSegments(); renderNovelty(); renderPower(); }
+renderHero(); renderDetail(); renderSegFilter(); renderValue(); renderMethods(); renderCharts();
+let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(renderCharts, 120); });
+</script>
+</body>
+</html>

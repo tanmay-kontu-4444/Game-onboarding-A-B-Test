@@ -15,7 +15,7 @@ The analysis recovers the simulator's true D7 effect inside its 95% CI (see `mak
 
 ![Metric scorecard](outputs/figures/metric_scorecard.png)
 
-📄 **[Experiment plan (pre-registration)](docs/01_experiment_plan.md)** · 📊 **[Experiment readout](docs/02_experiment_readout.md)**
+📄 **[Experiment plan (pre-registration)](docs/01_experiment_plan.md)** · 📊 **[Experiment readout](docs/02_experiment_readout.md)** · 🌐 **Interactive results site:** `site/index.html` (open locally, or publish with GitHub Pages)
 
 ## What this project demonstrates
 
@@ -26,13 +26,14 @@ The analysis recovers the simulator's true D7 effect inside its 95% CI (see `mak
 | 3. SQL | Assignment QC, dedup, eligibility and bot rules, per-player metrics, and segment aggregates in DuckDB (CTEs, window functions, `GROUPING SETS`) | `sql/`, `src/cohorts.py` |
 | 4. Statistics | SRM, balance, z-tests, Welch, delta-method and bootstrap CIs, CUPED and OLS adjustment, Holm and BH corrections, guardrails judged on CI vs threshold, segments, novelty, practical significance | `src/stats_utils.py`, `src/analysis.py` |
 | 5. Readout | PM- and director-facing readout. **Rendered from output tables**, with its claims checked against the results | `docs/02_experiment_readout.md`, `src/report.py` |
+| 5b. Website | One-file interactive results site: clickable scorecard, retention curves, segment filters, value calculator and power explorer. **Generated from the same results JSON** | `site/`, `src/site.py` |
 | 6. Tests | pytest suite: stats functions vs statsmodels, SRM, power vs `solve_power`, SQL rules on a hand-built dataset, and **recovery of the known true effects** | `tests/` |
 
 ## Run it
 
 ```bash
 pip install -r requirements.txt
-make all        # data -> cohorts -> analysis -> report -> test -> recovery check (about 40s)
+make all        # data -> cohorts -> analysis -> report -> site -> test -> recovery check (about 40s)
 ```
 
 Individual targets: `make data`, `make cohorts`, `make analysis`, `make report`, `make test`, `make recovery`.
@@ -53,9 +54,11 @@ A fixed seed (`src/config.py`) makes every number reproducible. Requires Python 
 │   ├── stats_utils.py               # reusable tests, CIs, CUPED, SRM, multiplicity
 │   ├── analysis.py                  # full analysis -> outputs/
 │   ├── report.py                    # renders the readout from outputs/tables/results.json
+│   ├── site.py                      # builds site/index.html from the results
 │   ├── recovery_check.py            # validation vs ground truth (not used by the readout)
 │   └── plotting.py                  # shared, colour-blind-safe figure style
 ├── sql/01_assignment_qc.sql … 04_segment_metrics.sql
+├── site/template.html, index.html   # interactive results website (generated)
 ├── outputs/tables/  outputs/figures/
 ├── notebooks/exploration.ipynb      # light EDA only; the real work lives in src/
 └── tests/
