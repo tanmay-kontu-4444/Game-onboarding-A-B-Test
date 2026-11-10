@@ -1,0 +1,10 @@
+# Generated data is reproducible via `make data` / `make cohorts` (fixed seed)
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+.venv/
