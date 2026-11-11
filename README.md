@@ -15,7 +15,7 @@ The analysis recovers the simulator's true D7 effect inside its 95% CI (see `mak
 
 ![Metric scorecard](outputs/figures/metric_scorecard.png)
 
-📄 **[Experiment plan (pre-registration)](docs/01_experiment_plan.md)** · 📊 **[Experiment readout](docs/02_experiment_readout.md)** · 🌐 **Interactive results site:** `site/index.html` (open locally, or publish with GitHub Pages)
+📄 **[Experiment plan (pre-registration)](docs/01_experiment_plan.md)** · 📊 **[Experiment readout](docs/02_experiment_readout.md)** · 🌐 **[Interactive results site](site/index.html)** (served by GitHub Pages from `site/`; also opens locally)
 
 ## What this project demonstrates
 
